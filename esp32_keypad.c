@@ -18,7 +18,6 @@
 
 
 //your const definitione
-#define DEF_EXMPL 1
 //END of your const definition
 
 
