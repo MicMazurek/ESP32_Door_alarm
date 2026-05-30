@@ -15,11 +15,16 @@
 #include "freertos/task.h"
 #include "hal/gpio_types.h"
 #include "rom/ets_sys.h"
+#include <sys/_intsup.h>
 
 
 //your const definitione
 //END of your const definition
 
+QueueHandle_t AlarmInfo;
+char* admin_passwd="06a03";
+char passwd[10]="1ab";
+bool ch_passwd=0;
 
 //static functions of library - do not change under any circumstance!!
 static int buffer_append(char value){
@@ -72,7 +77,7 @@ int keypad_init(){
 	gpio_config_t io_config={
 		.intr_type=GPIO_INTR_DISABLE,
 		.mode=GPIO_MODE_INPUT_OUTPUT,
-		.pin_bit_mask=((1<<COL_1)|(1<<COL_2)|(1<<COL_3)|(1<<COL_4)),
+		.pin_bit_mask=((1ULL<<COL_1)|(1ULL<<COL_2)|(1ULL<<COL_3)|(1ULL<<COL_4)),
 		.pull_down_en=0,
 		.pull_up_en=0,
 	};
@@ -84,7 +89,7 @@ int keypad_init(){
 	
 	io_config.intr_type=GPIO_INTR_NEGEDGE,
 	io_config.mode=GPIO_MODE_INPUT,
-	io_config.pin_bit_mask=((1<<ROW_1)|(1<<ROW_2)|(1<<ROW_3)|(1<<ROW_4)),
+	io_config.pin_bit_mask=((1ULL<<ROW_1)|(1ULL<<ROW_2)|(1ULL<<ROW_3)|(1ULL<<ROW_4)),
 	io_config.pull_down_en=0,
 	io_config.pull_up_en=1,
 	gpio_config(&io_config);
@@ -101,13 +106,24 @@ int keypad_error(){
 }
 
 void keypad_code_action(char *code){
-	if(strcmp(code,passwd)==0){
+	if((strcmp(code,passwd)==0||strcmp(code,admin_passwd)==0)&&(gpio_get_level(1)==1)){
 		if(gpio_get_level(20)==0){
-		gpio_set_level(1,0);
-		gpio_set_level(2,1);
-		gpio_set_level(21,0);
+			int info=1;
+			gpio_set_level(1,0);
+			gpio_set_level(2,1);
+			gpio_set_level(21,0);
+			xQueueSend(AlarmInfo,&info,1);
+			}
+	}else if(strcmp(code,admin_passwd)==0&&gpio_get_level(1)==0){
+			ch_passwd=1;
+			int info=2;
+			xQueueSend(AlarmInfo,&info,2);
+		}else if(ch_passwd==1&&gpio_get_level(1)==0){
+			strcpy(passwd,code);
+			int info=3;
+			xQueueSend(AlarmInfo,&info,3);
+			ch_passwd=0;
 		}
-	}
 }
 
 int keypad_set_key(const uint8_t new_key_definition, uint8_t key_col, uint8_t key_row){

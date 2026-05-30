@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include "freertos/idf_additions.h"
 #include <stdint.h>
 //Reference pins
 #define COL_1	15
@@ -23,10 +24,9 @@
 #define NUM_OF_COLS		4
 
 //Characters buffer
-#define MAX_NUM_OF_CHARACTERS	60
+#define MAX_NUM_OF_CHARACTERS	10
 static uint8_t buffer_length=0;
 static char buffer[MAX_NUM_OF_CHARACTERS];
-char* passwd="1ab";
 //Keypad overview
 static char keys[NUM_OF_ROWS][NUM_OF_COLS]={
 {'1','2','3','a'},

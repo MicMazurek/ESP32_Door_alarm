@@ -14,14 +14,14 @@
 #define LCD_RS 9
 #define LCD_RW 10
 #define LCD_EN	11
-#define LCD_D0	35
-#define LCD_D1	36
-#define LCD_D2	37
-#define LCD_D3	38
-#define LCD_D4	39
-#define LCD_D5	40
-#define LCD_D6	41
-#define LCD_D7	42
+#define LCD_D0	12
+#define LCD_D1	13
+#define LCD_D2	14
+#define LCD_D3	40
+#define LCD_D4	41
+#define LCD_D5	42
+#define LCD_D6	47
+#define LCD_D7	48
 //numbers definition
 #define LCD_ClearDisplay 	0b00000001
 #define LCD_ReturnHome  	0b00000010
@@ -106,7 +106,7 @@ static void lcd_send_data(uint8_t data){
 	gpio_set_level(LCD_RW,0);
 	enPin_pulse();
 }
-static int lcd_setCursour(uint8_t pos,uint8_t line){
+static int lcd_setCursor(uint8_t pos,uint8_t line){
 	if(pos<16&&line<2){
 		if(line==0) lcd_send_cmd(0x80|upper_line[pos]);
 		else lcd_send_cmd(0x80|lower_line[pos]);
@@ -137,13 +137,13 @@ int lcd_init(){
 	lcd_send_cmd(0x0C);   // Display ON, cursor OFF, blink OFF
 	return 1;
 }
-int lcd_print(const char* text,uint8_t line,uint8_t position){
+int lcd_print(char* text,uint8_t line,uint8_t position){
 	if(strlen(text)>16) return -1;
 	else if(line==0){
-		if(lcd_setCursour(0, 0)!=1) return -1;
+		if(lcd_setCursor(position, 0)!=1) return -1;
 	}
 	else if(line==1){
-			if(lcd_setCursour(0, 1)!=1) return -1;
+			if(lcd_setCursor(position, 1)!=1) return -1;
 	}
 		for(int i=0;i<strlen(text);i++){
 			lcd_send_data(text[i]);
@@ -151,7 +151,7 @@ int lcd_print(const char* text,uint8_t line,uint8_t position){
 	return 1;
 	
 }
-int lcd_send_line(const char* text,uint8_t line){
-	if(lcd_print((const char*)text,line,0)==1)	return 1;
+int lcd_send_line(char* text,uint8_t line){
+	if(lcd_print((char*)text,line,0)==1)	return 1;
 	else return -1;
 }

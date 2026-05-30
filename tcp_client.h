@@ -7,4 +7,5 @@
  
  #pragma once
  #include "stdint.h"
- int tcp_client_init(const char ipv4[],uint16_t* port);
+ int tcp_client_init(const char ipv4[],uint16_t* port,int* sockfd);
+ int tcp_client_close(int* sockfd);
